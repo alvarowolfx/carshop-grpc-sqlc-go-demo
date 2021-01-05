@@ -1,4 +1,4 @@
-# Go Grpc Workshop
+# Go GRPC + SQL Demo ( Future Workshop ? )
 
 We are gonna create an API simulating a car service shop. This workshop can do multiple services, like exchanging tires, do technical diagnostics, change parts and wash the car. All cars coming here will be washed as a last step and for changing parts on the car, it needs to go though diagnostics first.
 
@@ -11,22 +11,15 @@ Given all the above, we should expose some endpoints:
 - Finish a given service
 - Finish work order
 
-### gRPC
+### Running locally
 
-Our protobuf
+To run on dev with hot reload, install [air](https://github.com/cosmtrek/air) and run:
 
 ```
-service CarService {
-  rpc RegisterOwner(Owner) returns (google.protobuf.Empty)
-  rpc RegisterCar(Car) returns (google.protobuf.Empty)
-  rpc RegisterWorkOrder(WorkOrderRequest) returns (google.protobuf.Empty)
-  rpc StartWorkOrderService(StartWorkOrderServiceRequest) returns (google.protobuf.Empty)
-  rpc FinishWorkOrderService(FinishWorkOrderServiceRequest) returns (google.protobuf.Empty)
-  rpc EndWorkOrder(EndWorkOrderRequest)
-}
+air -c air.toml
 ```
 
-Our service will expose a gRPC API based on the above protobuf definition.
+The project also uses a PostgreSQL database and the database name needs to be created upfront. The db name can be informed on the `.env` file. By default it expects a database called `carservice-dev`.
 
 ### Generating code from our .proto file
 
@@ -38,19 +31,39 @@ go install \
     github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
     google.golang.org/protobuf/cmd/protoc-gen-go \
     google.golang.org/grpc/cmd/protoc-gen-go-grp
-
 ```
 
-To generate the files from our .proto, run:
+To generate the files from our .proto run:
 
 ```
-protoc -I . \
-  --go_out . --go_opt paths=source_relative \
-  --go-grpc_out . --go-grpc_opt paths=source_relative \
-  --grpc-gateway_out . \
-  --grpc-gateway_opt logtostderr=true \
-  --grpc-gateway_opt paths=source_relative \
-  --openapiv2_out . \
-  --openapiv2_opt logtostderr=true \
-  carshop.proto
+make protoc-generate
 ```
+
+### gRPC
+
+Our protobuf
+
+```
+service BackOfficeService {
+  rpc RegisterOwner(Owner) returns (google.protobuf.Empty)
+  rpc RegisterCar(Car) returns (google.protobuf.Empty)
+}
+
+service WorkOrderService {
+  rpc RegisterWorkOrder(WorkOrderRequest) returns (google.protobuf.Empty)
+  rpc GetRunningWorkOrders(RunningWorkOrdersQuery) returns (RunningWorkOrdersResponse)
+  rpc StartWorkOrderService(StartWorkOrderServiceRequest) returns (google.protobuf.Empty)
+  rpc FinishWorkOrderService(FinishWorkOrderServiceRequest) returns (google.protobuf.Empty)
+  rpc EndWorkOrder(EndWorkOrderRequest) returns (google.protobuf.Empty)
+}
+```
+
+Our service will expose a gRPC API based on the above protobuf definition.
+
+### Rest API and Swagger
+
+The same .proto file has annotations to generate a gateway/bridge between Rest and GRPC. Those annotation are provided by the `grpc-gateway` project mentioned before.
+
+### TODO
+
+- Validate/enforce order of services.
