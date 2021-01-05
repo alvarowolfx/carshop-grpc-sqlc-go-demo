@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "overrides": [
+    {
+      "column": "devices.data",
+      "go_type": "database/sql.NullString"
+    },
+    {
+      "column": "devices.meta",
+      "go_type": "database/sql.NullString"
+    }
+  ],
+  "packages": [
+    {
+      "path": "pkg/repository",
+      "name": "repository",
+      "schema": "assets/migrations",
+      "queries": "assets/queries",
+      "engine": "postgresql",
+      "emit_json_tags": true,
+      "emit_prepared_queries": true,
+      "emit_interface": true
+    }
+  ]
+}

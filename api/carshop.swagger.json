@@ -1,0 +1,446 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "carshop.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/carshop/cars": {
+      "post": {
+        "operationId": "BackOfficeService_RegisterCar",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/carshopCar"
+            }
+          }
+        ],
+        "tags": [
+          "BackOfficeService"
+        ]
+      }
+    },
+    "/v1/carshop/owners": {
+      "post": {
+        "operationId": "BackOfficeService_RegisterOwner",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/carshopOwner"
+            }
+          }
+        ],
+        "tags": [
+          "BackOfficeService"
+        ]
+      }
+    },
+    "/v1/carshop/workorder": {
+      "get": {
+        "operationId": "WorkOrderService_GetRunningWorkOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/carshopRunningWorkOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DIAGNOSTIC",
+                "CHANGE_PARTS",
+                "CHANGE_TIRES",
+                "WASH"
+              ]
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "WorkOrderService"
+        ]
+      },
+      "post": {
+        "operationId": "WorkOrderService_RegisterWorkOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/carshopWorkOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WorkOrderService"
+        ]
+      }
+    },
+    "/v1/carshop/workorder/{workOrderNumber}/end": {
+      "put": {
+        "operationId": "WorkOrderService_EndWorkOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "workOrderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/carshopEndWorkOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WorkOrderService"
+        ]
+      }
+    },
+    "/v1/carshop/workorder/{workOrderNumber}/finish": {
+      "put": {
+        "operationId": "WorkOrderService_FinishWorkOrderService",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "workOrderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/carshopFinishWorkOrderServiceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WorkOrderService"
+        ]
+      }
+    },
+    "/v1/carshop/workorder/{workOrderNumber}/start": {
+      "put": {
+        "operationId": "WorkOrderService_StartWorkOrderService",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "workOrderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/carshopStartWorkOrderServiceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WorkOrderService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "carshopCar": {
+      "type": "object",
+      "properties": {
+        "licensePlate": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "size": {
+          "$ref": "#/definitions/carshopCarSize"
+        },
+        "numWheels": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "carshopCarSize": {
+      "type": "string",
+      "enum": [
+        "SMALL",
+        "MEDIUM",
+        "LARGE"
+      ],
+      "default": "SMALL"
+    },
+    "carshopEndWorkOrderRequest": {
+      "type": "object",
+      "properties": {
+        "workOrderNumber": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "carshopFinishWorkOrderServiceRequest": {
+      "type": "object",
+      "properties": {
+        "workOrderNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "type": {
+          "$ref": "#/definitions/carshopServiceType"
+        }
+      }
+    },
+    "carshopOwner": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "nationalId": {
+          "type": "string"
+        }
+      }
+    },
+    "carshopRunningWorkOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "workOrder": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/carshopWorkOrder"
+          }
+        }
+      }
+    },
+    "carshopServiceType": {
+      "type": "string",
+      "enum": [
+        "DIAGNOSTIC",
+        "CHANGE_PARTS",
+        "CHANGE_TIRES",
+        "WASH"
+      ],
+      "default": "DIAGNOSTIC"
+    },
+    "carshopStartWorkOrderServiceRequest": {
+      "type": "object",
+      "properties": {
+        "workOrderNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "type": {
+          "$ref": "#/definitions/carshopServiceType"
+        }
+      }
+    },
+    "carshopWorkOrder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "licensePlate": {
+          "type": "string"
+        },
+        "changeTires": {
+          "type": "boolean"
+        },
+        "changeParts": {
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/definitions/carshopWorkOrderStatus"
+        },
+        "previousStatus": {
+          "$ref": "#/definitions/carshopWorkOrderStatus"
+        }
+      }
+    },
+    "carshopWorkOrderRequest": {
+      "type": "object",
+      "properties": {
+        "licensePlate": {
+          "type": "string"
+        },
+        "changeTires": {
+          "type": "boolean"
+        },
+        "changeParts": {
+          "type": "boolean"
+        }
+      }
+    },
+    "carshopWorkOrderStatus": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "DIAGNOSTICS",
+        "CHANGING_PARTS",
+        "CHANGING_TIRES",
+        "WASHING",
+        "IDLE",
+        "FINISHED",
+        "DONE"
+      ],
+      "default": "CREATED"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+option go_package = ".;carshop";
+
+package com.aviebrantz.carshop;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+message Owner {
+  string email = 1;
+  string national_id = 2;
+}
+
+enum CarSize {
+  SMALL = 0;
+  MEDIUM = 1;
+  LARGE = 2;
+}
+
+message Car {
+  string license_plate = 1;
+  int64 owner_id = 2;
+  CarSize size = 3;
+  int32 num_wheels = 4;
+  string color = 5;
+}
+
+enum ServiceType {
+  DIAGNOSTIC = 0;
+  CHANGE_PARTS = 1;
+  CHANGE_TIRES = 2;
+  WASH = 3;
+}
+
+enum WorkOrderStatus {
+  CREATED = 0;
+  DIAGNOSTICS = 1;
+  CHANGING_PARTS = 2;
+  CHANGING_TIRES = 3;
+  WASHING = 4;
+  IDLE = 5;
+  FINISHED = 6;
+  DONE = 7;
+}
+
+message WorkOrder {
+  int64 id = 1;
+  string license_plate = 2;
+
+  bool change_tires = 3;
+  bool change_parts = 4;
+  WorkOrderStatus status = 5;
+  WorkOrderStatus previous_status = 6;
+}
+
+message WorkOrderRequest {
+  string license_plate = 1;
+  bool change_tires = 2;
+  bool change_parts = 3;
+}
+
+message RunningWorkOrdersQuery {
+  repeated ServiceType type = 1;
+}
+
+message RunningWorkOrdersResponse {
+  repeated WorkOrder workOrder = 1;
+}
+
+message StartWorkOrderServiceRequest {
+  int64 work_order_number = 1;
+  ServiceType type = 2;
+}
+
+message FinishWorkOrderServiceRequest {
+  int64 work_order_number = 1;
+  ServiceType type = 2;
+}
+
+message EndWorkOrderRequest {
+  int64  work_order_number = 1;
+}
+
+service BackOfficeService {
+  rpc RegisterOwner(Owner) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/v1/carshop/owners",
+      body : "*"
+    };
+  }
+
+  rpc RegisterCar(Car) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/v1/carshop/cars",
+      body : "*"
+    };
+  }
+}
+
+service WorkOrderService {
+
+  rpc RegisterWorkOrder(WorkOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/v1/carshop/workorder",
+      body : "*"
+    };
+  }
+
+  rpc GetRunningWorkOrders(RunningWorkOrdersQuery) returns (RunningWorkOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/carshop/workorder"
+    };
+  }
+
+  rpc StartWorkOrderService(StartWorkOrderServiceRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put : "/v1/carshop/workorder/{work_order_number}/start",
+      body : "*"
+    };
+  }
+
+  rpc FinishWorkOrderService(FinishWorkOrderServiceRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put : "/v1/carshop/workorder/{work_order_number}/finish",
+      body : "*"
+    };
+  }
+
+  rpc EndWorkOrder(EndWorkOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put : "/v1/carshop/workorder/{work_order_number}/end",
+      body : "*"
+    };
+  }
+}
+
