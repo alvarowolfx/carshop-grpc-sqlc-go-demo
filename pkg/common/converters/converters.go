@@ -1,7 +1,8 @@
-package validations
+package converters
 
 import (
-	"com.aviebrantz.carshop/pkg/repository"
+	"com.aviebrantz.carshop/pkg/common/repository"
+	"com.aviebrantz.carshop/pkg/common/validations"
 	"github.com/lib/pq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -17,7 +18,7 @@ func CheckUniqueConstraintError(err error) error {
 	return err
 }
 
-func FromErrorResponsesToGrpcError(msg string, errors []*ErrorResponse) error {
+func FromErrorResponsesToGrpcError(msg string, errors []*validations.ErrorResponse) error {
 	st := status.New(codes.InvalidArgument, msg)
 	br := &errdetails.BadRequest{}
 	for _, err := range errors {

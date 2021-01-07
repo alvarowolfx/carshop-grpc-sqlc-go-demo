@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"os"
 
-	carshop "com.aviebrantz.carshop/api"
-	"com.aviebrantz.carshop/pkg/controllers"
-	"com.aviebrantz.carshop/pkg/database"
-	"com.aviebrantz.carshop/pkg/repository"
+	backOffice "com.aviebrantz.carshop/pkg/backoffice/controllers"
+	carshop "com.aviebrantz.carshop/pkg/common/api"
+	"com.aviebrantz.carshop/pkg/common/database"
+	"com.aviebrantz.carshop/pkg/common/repository"
+	workOrder "com.aviebrantz.carshop/pkg/workorder/controllers"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
@@ -31,7 +32,7 @@ func main() {
 
 	migrate.SetTable("migrations")
 	migrations := &migrate.PackrMigrationSource{
-		Box: packr.New("migrations", "../../assets/migrations"),
+		Box: packr.New("migrations", "../../db/migrations"),
 	}
 
 	db := database.MustConnectPostgres()
@@ -43,10 +44,10 @@ func main() {
 
 	repo := repository.New(db)
 
-	backOfficeController := controllers.NewBackOfficeController(controllers.BackOfficeControllerDeps{
+	backOfficeController := backOffice.NewController(backOffice.ControllerDeps{
 		DB: repo,
 	})
-	workOrderController := controllers.NewWorkOrderController(controllers.WorkOrderControllerDeps{
+	workOrderController := workOrder.NewController(workOrder.ControllerDeps{
 		DB: repo,
 	})
 

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	carshop "com.aviebrantz.carshop/api"
+	carshop "com.aviebrantz.carshop/pkg/common/api"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )

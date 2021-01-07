@@ -1,8 +1,9 @@
-package validations
+package domain
 
 import (
 	"regexp"
 
+	"com.aviebrantz.carshop/pkg/common/validations"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,8 +17,8 @@ type RegisterCarParam struct {
 	Color        string `validate:"iscolor"`
 }
 
-func RegisterCar(param *RegisterCarParam) []*ErrorResponse {
-	return validateStruct(param)
+func RegisterCar(param *RegisterCarParam) []*validations.ErrorResponse {
+	return validations.ValidateStruct(param)
 }
 
 func ValidateLicensePlate(fl validator.FieldLevel) bool {
@@ -34,5 +35,8 @@ func licensePlateValidation(licensePlate string) error {
 		return status.Errorf(codes.InvalidArgument, "%s should have format ABC-1234", licensePlate)
 	}
 	return nil
+}
 
+func init() {
+	validations.RegisterValidation("licensePlate", ValidateLicensePlate)
 }

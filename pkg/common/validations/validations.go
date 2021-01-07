@@ -14,8 +14,8 @@ var (
 	validate = validator.New()
 )
 
-// validateStruct Check if struct have errors and return properly formatted errors
-func validateStruct(requestStruct interface{}) []*ErrorResponse {
+// ValidateStruct Check if struct have errors and return properly formatted errors
+func ValidateStruct(requestStruct interface{}) []*ErrorResponse {
 	var errors []*ErrorResponse
 
 	err := validate.Struct(requestStruct)
@@ -32,7 +32,6 @@ func validateStruct(requestStruct interface{}) []*ErrorResponse {
 	return errors
 }
 
-func init() {
-	validate.RegisterValidation("licensePlate", ValidateLicensePlate)
-	validate.RegisterValidation("nationalID", ValidateNationalID)
+func RegisterValidation(tag string, fn validator.Func) error {
+	return validate.RegisterValidation(tag, fn)
 }

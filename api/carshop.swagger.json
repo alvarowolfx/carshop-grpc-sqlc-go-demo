@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "carshop.proto",
+    "title": "backoffice.proto",
     "version": "version not set"
   },
   "consumes": [

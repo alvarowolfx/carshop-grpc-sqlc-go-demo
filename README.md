@@ -67,3 +67,4 @@ The same .proto file has annotations to generate a gateway/bridge between Rest a
 ### TODO
 
 - Validate/enforce order of services.
+- Add Auth with Auth0

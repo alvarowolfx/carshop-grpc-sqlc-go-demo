@@ -12,10 +12,10 @@
   ],
   "packages": [
     {
-      "path": "pkg/repository",
+      "path": "pkg/common/repository",
       "name": "repository",
-      "schema": "assets/migrations",
-      "queries": "assets/queries",
+      "schema": "db/migrations",
+      "queries": "db/queries",
       "engine": "postgresql",
       "emit_json_tags": true,
       "emit_prepared_queries": true,

@@ -4,142 +4,25 @@ package carshop
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion7
 
-// BackOfficeServiceClient is the client API for BackOfficeService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type BackOfficeServiceClient interface {
-	RegisterOwner(ctx context.Context, in *Owner, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RegisterCar(ctx context.Context, in *Car, opts ...grpc.CallOption) (*emptypb.Empty, error)
-}
-
-type backOfficeServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewBackOfficeServiceClient(cc grpc.ClientConnInterface) BackOfficeServiceClient {
-	return &backOfficeServiceClient{cc}
-}
-
-func (c *backOfficeServiceClient) RegisterOwner(ctx context.Context, in *Owner, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/com.aviebrantz.carshop.BackOfficeService/RegisterOwner", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *backOfficeServiceClient) RegisterCar(ctx context.Context, in *Car, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/com.aviebrantz.carshop.BackOfficeService/RegisterCar", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// BackOfficeServiceServer is the server API for BackOfficeService service.
-// All implementations should embed UnimplementedBackOfficeServiceServer
-// for forward compatibility
-type BackOfficeServiceServer interface {
-	RegisterOwner(context.Context, *Owner) (*emptypb.Empty, error)
-	RegisterCar(context.Context, *Car) (*emptypb.Empty, error)
-}
-
-// UnimplementedBackOfficeServiceServer should be embedded to have forward compatible implementations.
-type UnimplementedBackOfficeServiceServer struct {
-}
-
-func (UnimplementedBackOfficeServiceServer) RegisterOwner(context.Context, *Owner) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterOwner not implemented")
-}
-func (UnimplementedBackOfficeServiceServer) RegisterCar(context.Context, *Car) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterCar not implemented")
-}
-
-// UnsafeBackOfficeServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to BackOfficeServiceServer will
-// result in compilation errors.
-type UnsafeBackOfficeServiceServer interface {
-	mustEmbedUnimplementedBackOfficeServiceServer()
-}
-
-func RegisterBackOfficeServiceServer(s *grpc.Server, srv BackOfficeServiceServer) {
-	s.RegisterService(&_BackOfficeService_serviceDesc, srv)
-}
-
-func _BackOfficeService_RegisterOwner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Owner)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BackOfficeServiceServer).RegisterOwner(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/com.aviebrantz.carshop.BackOfficeService/RegisterOwner",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BackOfficeServiceServer).RegisterOwner(ctx, req.(*Owner))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BackOfficeService_RegisterCar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Car)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BackOfficeServiceServer).RegisterCar(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/com.aviebrantz.carshop.BackOfficeService/RegisterCar",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BackOfficeServiceServer).RegisterCar(ctx, req.(*Car))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _BackOfficeService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "com.aviebrantz.carshop.BackOfficeService",
-	HandlerType: (*BackOfficeServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "RegisterOwner",
-			Handler:    _BackOfficeService_RegisterOwner_Handler,
-		},
-		{
-			MethodName: "RegisterCar",
-			Handler:    _BackOfficeService_RegisterCar_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "carshop.proto",
-}
-
 // WorkOrderServiceClient is the client API for WorkOrderService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkOrderServiceClient interface {
-	RegisterWorkOrder(ctx context.Context, in *WorkOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RegisterWorkOrder(ctx context.Context, in *WorkOrderRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetRunningWorkOrders(ctx context.Context, in *RunningWorkOrdersQuery, opts ...grpc.CallOption) (*RunningWorkOrdersResponse, error)
-	StartWorkOrderService(ctx context.Context, in *StartWorkOrderServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	FinishWorkOrderService(ctx context.Context, in *FinishWorkOrderServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	EndWorkOrder(ctx context.Context, in *EndWorkOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	StartWorkOrderService(ctx context.Context, in *StartWorkOrderServiceRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	FinishWorkOrderService(ctx context.Context, in *FinishWorkOrderServiceRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	EndWorkOrder(ctx context.Context, in *EndWorkOrderRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type workOrderServiceClient struct {
@@ -150,8 +33,8 @@ func NewWorkOrderServiceClient(cc grpc.ClientConnInterface) WorkOrderServiceClie
 	return &workOrderServiceClient{cc}
 }
 
-func (c *workOrderServiceClient) RegisterWorkOrder(ctx context.Context, in *WorkOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *workOrderServiceClient) RegisterWorkOrder(ctx context.Context, in *WorkOrderRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/com.aviebrantz.carshop.WorkOrderService/RegisterWorkOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -168,8 +51,8 @@ func (c *workOrderServiceClient) GetRunningWorkOrders(ctx context.Context, in *R
 	return out, nil
 }
 
-func (c *workOrderServiceClient) StartWorkOrderService(ctx context.Context, in *StartWorkOrderServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *workOrderServiceClient) StartWorkOrderService(ctx context.Context, in *StartWorkOrderServiceRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/com.aviebrantz.carshop.WorkOrderService/StartWorkOrderService", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -177,8 +60,8 @@ func (c *workOrderServiceClient) StartWorkOrderService(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *workOrderServiceClient) FinishWorkOrderService(ctx context.Context, in *FinishWorkOrderServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *workOrderServiceClient) FinishWorkOrderService(ctx context.Context, in *FinishWorkOrderServiceRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/com.aviebrantz.carshop.WorkOrderService/FinishWorkOrderService", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -186,8 +69,8 @@ func (c *workOrderServiceClient) FinishWorkOrderService(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *workOrderServiceClient) EndWorkOrder(ctx context.Context, in *EndWorkOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *workOrderServiceClient) EndWorkOrder(ctx context.Context, in *EndWorkOrderRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/com.aviebrantz.carshop.WorkOrderService/EndWorkOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -199,30 +82,30 @@ func (c *workOrderServiceClient) EndWorkOrder(ctx context.Context, in *EndWorkOr
 // All implementations should embed UnimplementedWorkOrderServiceServer
 // for forward compatibility
 type WorkOrderServiceServer interface {
-	RegisterWorkOrder(context.Context, *WorkOrderRequest) (*emptypb.Empty, error)
+	RegisterWorkOrder(context.Context, *WorkOrderRequest) (*empty.Empty, error)
 	GetRunningWorkOrders(context.Context, *RunningWorkOrdersQuery) (*RunningWorkOrdersResponse, error)
-	StartWorkOrderService(context.Context, *StartWorkOrderServiceRequest) (*emptypb.Empty, error)
-	FinishWorkOrderService(context.Context, *FinishWorkOrderServiceRequest) (*emptypb.Empty, error)
-	EndWorkOrder(context.Context, *EndWorkOrderRequest) (*emptypb.Empty, error)
+	StartWorkOrderService(context.Context, *StartWorkOrderServiceRequest) (*empty.Empty, error)
+	FinishWorkOrderService(context.Context, *FinishWorkOrderServiceRequest) (*empty.Empty, error)
+	EndWorkOrder(context.Context, *EndWorkOrderRequest) (*empty.Empty, error)
 }
 
 // UnimplementedWorkOrderServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedWorkOrderServiceServer struct {
 }
 
-func (UnimplementedWorkOrderServiceServer) RegisterWorkOrder(context.Context, *WorkOrderRequest) (*emptypb.Empty, error) {
+func (UnimplementedWorkOrderServiceServer) RegisterWorkOrder(context.Context, *WorkOrderRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterWorkOrder not implemented")
 }
 func (UnimplementedWorkOrderServiceServer) GetRunningWorkOrders(context.Context, *RunningWorkOrdersQuery) (*RunningWorkOrdersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRunningWorkOrders not implemented")
 }
-func (UnimplementedWorkOrderServiceServer) StartWorkOrderService(context.Context, *StartWorkOrderServiceRequest) (*emptypb.Empty, error) {
+func (UnimplementedWorkOrderServiceServer) StartWorkOrderService(context.Context, *StartWorkOrderServiceRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartWorkOrderService not implemented")
 }
-func (UnimplementedWorkOrderServiceServer) FinishWorkOrderService(context.Context, *FinishWorkOrderServiceRequest) (*emptypb.Empty, error) {
+func (UnimplementedWorkOrderServiceServer) FinishWorkOrderService(context.Context, *FinishWorkOrderServiceRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FinishWorkOrderService not implemented")
 }
-func (UnimplementedWorkOrderServiceServer) EndWorkOrder(context.Context, *EndWorkOrderRequest) (*emptypb.Empty, error) {
+func (UnimplementedWorkOrderServiceServer) EndWorkOrder(context.Context, *EndWorkOrderRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndWorkOrder not implemented")
 }
 
@@ -353,5 +236,5 @@ var _WorkOrderService_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "carshop.proto",
+	Metadata: "workorder/workorder.proto",
 }

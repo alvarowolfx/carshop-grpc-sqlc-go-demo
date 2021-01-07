@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"net/http"
 
-	carshop "com.aviebrantz.carshop/api"
-	"com.aviebrantz.carshop/pkg/repository"
-	"com.aviebrantz.carshop/pkg/validations"
+	"com.aviebrantz.carshop/pkg/backoffice/domain"
+	carshop "com.aviebrantz.carshop/pkg/common/api"
+	"com.aviebrantz.carshop/pkg/common/converters"
+	"com.aviebrantz.carshop/pkg/common/repository"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
@@ -18,30 +19,30 @@ type BackOfficeController interface {
 	carshop.BackOfficeServiceServer
 }
 
-type BackOfficeControllerDeps struct {
+type ControllerDeps struct {
 	DB repository.Querier
 }
 
 type backOfficeController struct {
-	deps    BackOfficeControllerDeps
+	deps    ControllerDeps
 	client  *http.Client
 	encoder *jsonpb.Marshaler
 }
 
-// NewBackOfficeController
-func NewBackOfficeController(deps BackOfficeControllerDeps) BackOfficeController {
+// NewController
+func NewController(deps ControllerDeps) BackOfficeController {
 	return &backOfficeController{
 		deps: deps,
 	}
 }
 
 func (cs *backOfficeController) RegisterOwner(ctx context.Context, param *carshop.Owner) (*empty.Empty, error) {
-	errs := validations.RegisterOwner(&validations.RegisterOwnerParams{
+	errs := domain.RegisterOwner(&domain.RegisterOwnerParams{
 		Email:      param.Email,
 		NationalID: param.NationalId,
 	})
 	if len(errs) != 0 {
-		err := validations.FromErrorResponsesToGrpcError("invalid parameters for owner registration", errs)
+		err := converters.FromErrorResponsesToGrpcError("invalid parameters for owner registration", errs)
 		return nil, err
 	}
 	_, err := cs.deps.DB.CreateOwner(ctx, repository.CreateOwnerParams{
@@ -49,13 +50,13 @@ func (cs *backOfficeController) RegisterOwner(ctx context.Context, param *carsho
 		NationalID: param.NationalId,
 	})
 	if err != nil {
-		return nil, validations.CheckUniqueConstraintError(err)
+		return nil, converters.CheckUniqueConstraintError(err)
 	}
 	return &empty.Empty{}, err
 }
 
 func (cs *backOfficeController) RegisterCar(ctx context.Context, param *carshop.Car) (*empty.Empty, error) {
-	errs := validations.RegisterCar(&validations.RegisterCarParam{
+	errs := domain.RegisterCar(&domain.RegisterCarParam{
 		LicensePlate: param.LicensePlate,
 		OwnerID:      param.OwnerId,
 		Size:         int32(param.Size),
@@ -63,7 +64,7 @@ func (cs *backOfficeController) RegisterCar(ctx context.Context, param *carshop.
 		Color:        param.Color,
 	})
 	if len(errs) != 0 {
-		err := validations.FromErrorResponsesToGrpcError("invalid parameters for car registration", errs)
+		err := converters.FromErrorResponsesToGrpcError("invalid parameters for car registration", errs)
 		return nil, err
 	}
 
@@ -84,5 +85,6 @@ func (cs *backOfficeController) RegisterCar(ctx context.Context, param *carshop.
 		Color:        param.Color,
 		OwnerID:      param.OwnerId,
 	})
-	return &empty.Empty{}, validations.CheckUniqueConstraintError(err)
+
+	return &empty.Empty{}, converters.CheckUniqueConstraintError(err)
 }

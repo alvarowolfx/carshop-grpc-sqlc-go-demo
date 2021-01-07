@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = ".;carshop";
+
+package com.aviebrantz.carshop;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+message Owner {
+  string email = 1;
+  string national_id = 2;
+}
+
+enum CarSize {
+  SMALL = 0;
+  MEDIUM = 1;
+  LARGE = 2;
+}
+
+message Car {
+  string license_plate = 1;
+  int64 owner_id = 2;
+  CarSize size = 3;
+  int32 num_wheels = 4;
+  string color = 5;
+}
+
+service BackOfficeService {
+  rpc RegisterOwner(Owner) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/v1/carshop/owners",
+      body : "*"
+    };
+  }
+
+  rpc RegisterCar(Car) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/v1/carshop/cars",
+      body : "*"
+    };
+  }
+}

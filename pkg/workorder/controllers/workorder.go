@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	carshop "com.aviebrantz.carshop/api"
-	"com.aviebrantz.carshop/pkg/repository"
-	"com.aviebrantz.carshop/pkg/validations"
+	"com.aviebrantz.carshop/pkg/backoffice/domain"
+	carshop "com.aviebrantz.carshop/pkg/common/api"
+	"com.aviebrantz.carshop/pkg/common/repository"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
@@ -19,18 +19,18 @@ type WorkOrderController interface {
 	carshop.WorkOrderServiceServer
 }
 
-type WorkOrderControllerDeps struct {
+type ControllerDeps struct {
 	DB repository.Querier
 }
 
 type workOrderController struct {
-	deps    WorkOrderControllerDeps
+	deps    ControllerDeps
 	client  *http.Client
 	encoder *jsonpb.Marshaler
 }
 
-// NewWorkOrderController
-func NewWorkOrderController(deps WorkOrderControllerDeps) WorkOrderController {
+// NewController
+func NewController(deps ControllerDeps) WorkOrderController {
 	return &workOrderController{
 		deps: deps,
 	}
@@ -124,7 +124,7 @@ func (woc *workOrderController) StartWorkOrderService(ctx context.Context, param
 
 	err = woc.deps.DB.UpdateWorkOrderServiceStatus(ctx, repository.UpdateWorkOrderServiceStatusParams{
 		ID:            int32(params.WorkOrderNumber),
-		CurrentStatus: validations.FromServiceTypeToWorkStatus(serviceType),
+		CurrentStatus: domain.FromServiceTypeToWorkStatus(serviceType),
 	})
 
 	if err != nil {
