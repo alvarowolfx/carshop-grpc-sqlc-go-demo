@@ -1,9 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "backoffice.proto",
-    "version": "version not set"
+    "title": "Carshop API",
+    "version": "1.0"
   },
+  "host": "localhost:9090",
+  "schemes": [
+    "http"
+  ],
   "consumes": [
     "application/json"
   ],
@@ -442,5 +446,9 @@
         }
       }
     }
+  },
+  "externalDocs": {
+    "description": "Demo Carshop application using gRPC-gateway",
+    "url": "https://github.com/alvarowolfx/carshop-grpc-sqlc-go-demo"
   }
 }
