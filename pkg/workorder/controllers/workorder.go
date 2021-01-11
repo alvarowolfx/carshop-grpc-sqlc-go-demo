@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
+	"com.aviebrantz.carshop/pkg/auth"
 	"com.aviebrantz.carshop/pkg/backoffice/domain"
 	carshop "com.aviebrantz.carshop/pkg/common/api"
 	"com.aviebrantz.carshop/pkg/common/repository"
@@ -20,7 +22,8 @@ type WorkOrderController interface {
 }
 
 type ControllerDeps struct {
-	DB repository.Querier
+	DB           repository.Querier
+	AuthProvider auth.AuthProvider
 }
 
 type workOrderController struct {
@@ -34,6 +37,32 @@ func NewController(deps ControllerDeps) WorkOrderController {
 	return &workOrderController{
 		deps: deps,
 	}
+}
+
+func (woc *workOrderController) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+	if strings.HasSuffix(fullMethodName, "GetRunningWorkOrders") {
+		return ctx, nil
+	}
+
+	authFunc := auth.VerifyFuncForProvider(woc.deps.AuthProvider)
+	ctx, err := authFunc(ctx)
+	if err != nil {
+		return ctx, err
+	}
+
+	/*if strings.HasSuffix(fullMethodName, "GetRunningWorkOrders") {
+		hasScope := auth.CheckScopeFromContext(ctx, "read:work_orders")
+		if !hasScope {
+			return ctx, status.Error(codes.Unauthenticated, "not enough permissions")
+		}
+		return ctx, nil
+	}*/
+
+	hasScope := auth.CheckScopeFromContext(ctx, "write:work_orders")
+	if !hasScope {
+		return ctx, status.Error(codes.Unauthenticated, "not enough permissions")
+	}
+	return ctx, nil
 }
 
 func (woc *workOrderController) RegisterWorkOrder(ctx context.Context, params *carshop.WorkOrderRequest) (*empty.Empty, error) {
@@ -109,7 +138,7 @@ func (woc *workOrderController) StartWorkOrderService(ctx context.Context, param
 	}
 
 	if len(services) > 0 {
-		return nil, status.Error(codes.FailedPrecondition, "There are services already being executed: %v")
+		return nil, status.Error(codes.FailedPrecondition, "There are services already being executed")
 	}
 
 	serviceType := repository.ServiceType(params.Type.String())

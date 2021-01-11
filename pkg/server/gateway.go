@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io"
 	"log"
@@ -9,12 +10,14 @@ import (
 	"os"
 	"strings"
 
+	"com.aviebrantz.carshop/pkg/auth"
 	backOffice "com.aviebrantz.carshop/pkg/backoffice/controllers"
 	carshop "com.aviebrantz.carshop/pkg/common/api"
 	"com.aviebrantz.carshop/pkg/common/database"
 	"com.aviebrantz.carshop/pkg/common/repository"
 	workOrder "com.aviebrantz.carshop/pkg/workorder/controllers"
 	"github.com/gobuffalo/packr/v2"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
 	migrate "github.com/rubenv/sql-migrate"
@@ -35,6 +38,19 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 	}), &http2.Server{})
 }
 
+func runMigrations(db *sql.DB) {
+	migrate.SetTable("migrations")
+	migrations := &migrate.PackrMigrationSource{
+		Box: packr.New("migrations", "../../db/migrations"),
+	}
+
+	n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
+	if err != nil {
+		log.Fatalf("Failed to apply db migrations: %v\n", err)
+	}
+	log.Printf("Applied %d migrations!\n", n)
+}
+
 func Run() error {
 	err := godotenv.Load()
 	if err != nil {
@@ -44,28 +60,38 @@ func Run() error {
 	port := os.Getenv("PORT")
 	addr := fmt.Sprintf(":%s", port)
 
-	migrate.SetTable("migrations")
-	migrations := &migrate.PackrMigrationSource{
-		Box: packr.New("migrations", "../../db/migrations"),
-	}
-
 	db := database.MustConnectPostgres()
-	n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
-	if err != nil {
-		log.Fatalf("Failed to apply db migrations: %v\n", err)
-	}
-	log.Printf("Applied %d migrations!\n", n)
-
+	runMigrations(db)
 	repo := repository.New(db)
+
+	grpcServerOpts := []grpc.ServerOption{}
+	authProviderType := os.Getenv("AUTH_PROVIDER")
+	var authProvider auth.AuthProvider
+	if authProviderType == "auth0" {
+		identifier := os.Getenv("AUTH0_IDENTIFIER")
+		issuer := os.Getenv("AUTH0_ISSUER")
+		jwksURI := os.Getenv("AUTH0_JWKS_URI")
+		authProvider = &auth.Auth0Provider{
+			Identifier: identifier,
+			Issuer:     issuer,
+			JwksURI:    jwksURI,
+		}
+		authFunc := auth.VerifyFuncForProvider(authProvider)
+		grpcServerOpts = append(
+			grpcServerOpts,
+			grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(authFunc)),
+		)
+	}
 
 	backOfficeController := backOffice.NewController(backOffice.ControllerDeps{
 		DB: repo,
 	})
 	workOrderController := workOrder.NewController(workOrder.ControllerDeps{
-		DB: repo,
+		DB:           repo,
+		AuthProvider: authProvider,
 	})
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpcServerOpts...)
 	carshop.RegisterWorkOrderServiceServer(grpcServer, workOrderController)
 	carshop.RegisterBackOfficeServiceServer(grpcServer, backOfficeController)
 
