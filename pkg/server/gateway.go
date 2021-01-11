@@ -3,10 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
-	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	backOffice "com.aviebrantz.carshop/pkg/backoffice/controllers"
 	carshop "com.aviebrantz.carshop/pkg/common/api"
@@ -17,8 +18,22 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
 	migrate "github.com/rubenv/sql-migrate"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 )
+
+// grpcHandlerFunc returns an http.Handler that delegates to grpcServer on incoming gRPC
+// connections or otherHandler otherwise. Copied from cockroachdb.
+func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Handler {
+	return h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
+			grpcServer.ServeHTTP(w, r)
+		} else {
+			otherHandler.ServeHTTP(w, r)
+		}
+	}), &http2.Server{})
+}
 
 func Run() error {
 	err := godotenv.Load()
@@ -26,9 +41,8 @@ func Run() error {
 		log.Println("Error loading .env file")
 	}
 
-	restPort := os.Getenv("REST_PORT")
-	grpcPort := os.Getenv("GRPC_PORT")
-	grpcAddr := fmt.Sprintf("localhost:%s", grpcPort)
+	port := os.Getenv("PORT")
+	addr := fmt.Sprintf(":%s", port)
 
 	migrate.SetTable("migrations")
 	migrations := &migrate.PackrMigrationSource{
@@ -51,41 +65,44 @@ func Run() error {
 		DB: repo,
 	})
 
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	grpcServer := grpc.NewServer()
+	carshop.RegisterWorkOrderServiceServer(grpcServer, workOrderController)
+	carshop.RegisterBackOfficeServiceServer(grpcServer, backOfficeController)
 
-	conn, err := net.Listen("tcp", fmt.Sprintf(":%s", grpcPort))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-		return err
-	}
-	s := grpc.NewServer()
-	carshop.RegisterWorkOrderServiceServer(s, workOrderController)
-	carshop.RegisterBackOfficeServiceServer(s, backOfficeController)
-
-	go func() {
-		if err := s.Serve(conn); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-		}
-	}()
+	// Start HTTP server that serves both Rest Gateway and GRPC
+	mux := http.NewServeMux()
 
 	// Register gRPC server endpoint
-	// Note: Make sure the gRPC server is running properly and accessible
-	mux := runtime.NewServeMux()
-	muxWithCors := allowCORS(mux)
+	gwmux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err = carshop.RegisterWorkOrderServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
+
+	ctx := context.Background()
+	err = carshop.RegisterWorkOrderServiceHandlerFromEndpoint(ctx, gwmux, addr, opts)
 	if err != nil {
 		log.Fatalf("Failed to start grpc server: %v\n", err)
 		return err
 	}
-	err = carshop.RegisterBackOfficeServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
+	err = carshop.RegisterBackOfficeServiceHandlerFromEndpoint(ctx, gwmux, addr, opts)
 	if err != nil {
 		log.Fatalf("Failed to start grpc server: %v\n", err)
 		return err
 	}
 
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(fmt.Sprintf(":%s", restPort), muxWithCors)
+	mux.Handle("/", gwmux)
+	swaggerBox := packr.New("swagger.json", "../../api")
+	mux.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		swagger, err := swaggerBox.FindString("carshop.swagger.json")
+		if err != nil {
+			w.WriteHeader(404)
+			io.WriteString(w, "Swagger file not found")
+			return
+		}
+		io.Copy(w, strings.NewReader(swagger))
+	})
+	muxWithCors := allowCORS(mux)
+
+	return http.ListenAndServe(
+		addr,
+		grpcHandlerFunc(grpcServer, muxWithCors),
+	)
 }

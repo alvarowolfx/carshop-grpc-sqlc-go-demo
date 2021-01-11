@@ -17,8 +17,8 @@ func main() {
 		log.Println("Error loading .env file")
 	}
 
-	grpcPort := os.Getenv("GRPC_PORT")
-	grpcAddr := fmt.Sprintf(":%s", grpcPort)
+	port := os.Getenv("PORT")
+	grpcAddr := fmt.Sprintf(":%s", port)
 
 	var conn *grpc.ClientConn
 	conn, err = grpc.Dial(grpcAddr, grpc.WithInsecure())
